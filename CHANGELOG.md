@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.0 (2026-11-04)
+
+- `egisops portal-health`: portal health check, site and license, each machine's
+  readiness (one of two down warns, all down fails), soonest expiring user type or other
+  entitlement, member license capacity and full user types, TLS certificate, federated
+  server validation with a hosting server present, search index against stored content,
+  version.
+- `egisops datastore`: finds the managed ArcGIS Data Store items on the hosting server and
+  runs the documented `validate` on each. Reads the machine list rather than trusting the
+  overall health line; standby, registration and server connection, newest backup age
+  (`--backup-days`, default 7), spatiotemporal cluster status. `--machine` when the data
+  item does not list one.
+- ADR 0005: Portal tokens travel in the `X-Esri-Authorization` header; data store machine
+  names come from the item or `--machine`.
+- Certificate findings shared between server-health and portal-health.
+- Stopped tracking the `build/` directory.
+
 ## 0.2.0 (2026-11-04)
 
 - `egisops services`: every folder's services report; services configured STARTED but
