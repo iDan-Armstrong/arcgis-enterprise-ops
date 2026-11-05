@@ -3,6 +3,8 @@
     egisops server-health --url https://gis.example.com/arcgis --user siteadmin
     egisops services      --url https://gis.example.com/arcgis --user siteadmin
     egisops logs          --url https://gis.example.com/arcgis --hours 24
+    egisops portal-health --url https://gis.example.com/portal --user portaladmin
+    egisops datastore     --url https://gis.example.com/server --user siteadmin
     EGISOPS_TOKEN=... egisops server-health --url ... --json
 
 Credentials: EGISOPS_TOKEN, or a user (--user or EGISOPS_USER) with EGISOPS_PASSWORD or
@@ -45,14 +47,15 @@ def emit(args, header: list[str], findings: list[Finding], extra: dict) -> int:
     return exit_code(findings)
 
 
-def connect(args):
+def connect(args, portal: bool = False):
     import getpass
     import ssl
 
-    from .client import ServerAdmin, credentials_from_env, urllib_transport
+    from .client import PortalAdmin, ServerAdmin, credentials_from_env, urllib_transport
 
     context = ssl.create_default_context(cafile=args.ca_file) if args.ca_file else None
-    admin = ServerAdmin(args.url, urllib_transport(context=context))
+    cls = PortalAdmin if portal else ServerAdmin
+    admin = cls(args.url, urllib_transport(context=context))
     if args.no_login:
         return admin
     user, password, token = credentials_from_env(args.user)
@@ -104,8 +107,39 @@ def cmd_logs(args) -> int:
     return emit(args, header, findings, {"url": admin.base, "entries": len(snap.entries)})
 
 
+def cmd_portal_health(args) -> int:
+    from . import portal
+
+    p = connect(args, portal=True)
+    snap = portal.gather(p)
+    findings = portal.evaluate(snap, datetime.now(UTC))
+    header = [
+        f"portal-health  {snap.base_url}"
+        + (f"  Portal for ArcGIS {snap.version}" if snap.version else "")
+    ]
+    return emit(args, header, findings, {"url": snap.base_url, "version": snap.version})
+
+
+def cmd_datastore(args) -> int:
+    from . import datastore
+
+    admin = connect(args)
+    snap = datastore.gather(admin, machine=args.machine)
+    findings = datastore.evaluate(
+        snap, datetime.now(UTC), datastore.Thresholds(backup_warn_days=args.backup_days)
+    )
+    header = [f"datastore  {admin.base}  {len(snap.stores)} data store(s)"]
+    return emit(
+        args, header, findings, {"url": admin.base, "stores": [d.path for d in snap.stores]}
+    )
+
+
 def _site_args(sp, *, allow_no_login: bool = False):
-    sp.add_argument("--url", required=True, help="Server root, e.g. https://gis.example.com/arcgis")
+    sp.add_argument(
+        "--url",
+        required=True,
+        help="Site root, e.g. https://gis.example.com/arcgis (Server) or .../portal (Portal)",
+    )
     sp.add_argument(
         "--user", help="Admin user (or EGISOPS_USER); password from EGISOPS_PASSWORD or a prompt"
     )
@@ -146,6 +180,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     lg.add_argument("--max-pages", type=int, default=5)
     lg.set_defaults(func=cmd_logs)
+
+    ph = sub.add_parser(
+        "portal-health", help="Portal health, machines, license, federation, search index"
+    )
+    _site_args(ph, allow_no_login=True)
+    ph.set_defaults(func=cmd_portal_health)
+
+    ds = sub.add_parser("datastore", help="ArcGIS Data Store validation and backup age")
+    _site_args(ds)
+    ds.add_argument(
+        "--machine", help="A data store machine name, if the data item does not list one"
+    )
+    ds.add_argument(
+        "--backup-days", type=float, default=7, help="Warn when the newest backup is older"
+    )
+    ds.set_defaults(func=cmd_datastore)
     return p
 
 

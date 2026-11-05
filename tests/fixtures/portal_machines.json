@@ -1,0 +1,16 @@
+{
+  "machines": [
+    {
+      "machineName": "machine1.example.com",
+      "adminURL": "https://machine1.example.com:7443/arcgis",
+      "role": "standby",
+      "platform": "Linux-amd64-5.4.17-2136.301.1.4.el8uek.x86_64"
+    },
+    {
+      "machineName": "machine2.example.com",
+      "adminURL": "https://machine2.example.com:7443/arcgis",
+      "role": "primary",
+      "platform": "Linux-amd64-5.4.17-2136.301.1.4.el8uek.x86_64"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "isPostUpgrade": false,
+  "isLicensePopulated": true,
+  "siteKey": "<sitekey>",
+  "resources": [
+    "license",
+    "system",
+    "security",
+    "federation",
+    "logs",
+    "machines",
+    "upgradeHistory",
+    "mode",
+    "info",
+    "backupRestoreInfo",
+    "about"
+  ],
+  "isPortalLicensed": true,
+  "isLicenseFileRequired": false,
+  "isUserTypeLicensing": true,
+  "version": "11.5.0",
+  "currentbuild": "11.5.0.0"
+}

@@ -1,0 +1,40 @@
+{
+  "status": "success",
+  "serversStatus": [
+    {
+      "status": "success",
+      "serverId": "A5jgUpHKuk8thd8R",
+      "messages": [
+        "ArcGIS Server administration URL 'https://machine1.esri.com:6443/arcgis' is accessible.",
+        "Validating Knolwedge Server.",
+        "ArcGIS Server 'https://machine1.esri.com:6443/arcgis' version matches with Portal for ArcGIS."
+      ],
+      "adminUrl": "https://machine1.esri.com:6443/arcgis"
+    },
+    {
+      "status": "success",
+      "serverId": "07YfVcO6qk2iwqF7",
+      "messages": [
+        "ArcGIS Server administration URL 'https://machine3.esri.com:6443/arcgis' is accessible.",
+        "Validating hosting server.",
+        "ArcGIS Server 'https://machine3.esri.com:6443/arcgis' version matches with Portal for ArcGIS.",
+        "Verified that server has an ArcGIS Data Store registered as a managed database '/enterpriseDatabases/AGSDataStore_ds_dyilhg3y'.",
+        "The server managed database '/enterpriseDatabases/AGSDataStore_ds_dyilhg3y' validated successfully.",
+        "Validated that the ArcGIS Server site is not in read-only mode.",
+        "Validated that the publishing tools service of ArcGIS Server site is started."
+      ],
+      "adminUrl": "https://machine3.esri.com:6443/arcgis"
+    },
+    {
+      "status": "success",
+      "serverId": "ij8kEYiPWA94e30S",
+      "messages": [
+        "ArcGIS Server administration URL 'https://machine4.esri.com:6443/arcgis' is accessible.",
+        "Validating RasterAnalytics server.",
+        "ArcGIS Server 'https://machine4.esri.com:6443/arcgis' version matches with Portal for ArcGIS.",
+        "Verified that the server has a registered raster data store '/rasterStores/_raster_store'."
+      ],
+      "adminUrl": "https://machine4.esri.com:6443/arcgis"
+    }
+  ]
+}

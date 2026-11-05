@@ -1,0 +1,54 @@
+{
+  "datastore.release": "11.0.0.35046",
+  "datastore.name": "ds_d0hv9sqh",
+  "datastore.replmethod": "ASYNC",
+  "datastore.isConfigured": "true",
+  "machines": [
+    {
+      "machine.overallhealth": "Healthy",
+      "datastore.release": "11.0.0.35046",
+      "datastore.release.configstore": "1.5",
+      "platform": "Windows",
+      "machine.isReachable": "true",
+      "hostip": "10.44.9.21",
+      "name": "MACHINE.EXAMPLE.COM",
+      "role": "PRIMARY",
+      "dbport": 9876,
+      "initstarttime": 1658691914117,
+      "healthcheck.enable": "true",
+      "status": "Started",
+      "adminurl": "https://MACHINE.EXAMPLE.COM:2443/arcgis/datastoreadmin/",
+      "db.isactive": "true",
+      "db.isAccepting": "true",
+      "db.isInRecovery": "false",
+      "db.ActiveReplMethod": "NONE",
+      "db.isManagedUserConnValid": "true",
+      "datastore.release.pg": "12.4",
+      "datastore.release.sde": "11.0.0",
+      "datastore.release.geometry": "1.30.4.10",
+      "datastore.release.geometrylib": "1.30.4.10",
+      "db.isSiteConnValid": "true"
+    }
+  ],
+  "datastore.release.configstore": "1.5",
+  "datastore.release.geometry": "1.30.4.10",
+  "datastore.release.geometrylib": "1.30.4.10",
+  "datastore.release.sde": "11.0.0",
+  "datastore.release.pg": "12.4",
+  "datastore.layer.extent.updated": false,
+  "datastore.status": "Started",
+  "datastore.isActiveHA": "false",
+  "datastore.overallhealth": "Healthy",
+  "datastore.lastfailover": -1,
+  "datastore.lastbackup": 1658732403060,
+  "datastore.isRegistered": "true",
+  "datastore.hasValidServerConnection": "true",
+  "datastore.validServerMachinesList": [
+    {
+      "machineName": "MACHINE.EXAMPLE.COM",
+      "adminURL": "https://MACHINE.EXAMPLE.COM:6443/arcgis/admin"
+    }
+  ],
+  "owningSystemUrl": "https://MACHINE.EXAMPLE.COM/server",
+  "status": "success"
+}

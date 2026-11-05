@@ -1,0 +1,27 @@
+{
+  "datastore.name": "bds_123e45vf",
+  "clusterStatus": "GREEN",
+  "datastore.overallhealth": "Healthy",
+  "isHealthy": true,
+  "numOfNodes": 3,
+  "numOfPendingTasks": 0,
+  "activeShards": 22,
+  "activePrimaryShards": 11,
+  "relocatingShards": 0,
+  "initializingShards": 0,
+  "unassigned_shards": 0,
+  "nodes": [
+    {
+      "name": "MACHINE.EXAMPLE.COM",
+      "heapSize": 17179869184
+    },
+    {
+      "name": "MACHINE2.EXAMPLE.COM",
+      "heapSize": 14004781056
+    },
+    {
+      "name": "MACHINE3.EXAMPLE.COM",
+      "heapSize": 14004781056
+    }
+  ]
+}

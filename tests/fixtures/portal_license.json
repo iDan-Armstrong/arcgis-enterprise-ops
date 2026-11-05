@@ -1,0 +1,65 @@
+{
+  "currentRegisteredMembers": 70,
+  "maximumRegisteredMembers": 1400,
+  "version": "11.4",
+  "userTypes": [
+    {
+      "id": "IndoorsUserUT",
+      "maximumRegisteredMembers": 200,
+      "expiration": 1761091200000,
+      "currentRegisteredMembers": 1
+    },
+    {
+      "id": "creatorUT",
+      "maximumRegisteredMembers": 200,
+      "expiration": 1761091200000,
+      "currentRegisteredMembers": 53
+    },
+    {
+      "id": "editorUT",
+      "maximumRegisteredMembers": 200,
+      "expiration": 1761091200000,
+      "currentRegisteredMembers": 2
+    },
+    {
+      "id": "GISProfessionalAdvUT",
+      "maximumRegisteredMembers": 200,
+      "expiration": 1761091200000,
+      "currentRegisteredMembers": 6
+    },
+    {
+      "id": "GISProfessionalStdUT",
+      "maximumRegisteredMembers": 200,
+      "expiration": 1761091200000,
+      "currentRegisteredMembers": 2
+    },
+    {
+      "id": "viewerUT",
+      "maximumRegisteredMembers": 200,
+      "expiration": 1761091200000,
+      "currentRegisteredMembers": 4
+    },
+    {
+      "id": "fieldWorkerUT",
+      "maximumRegisteredMembers": 200,
+      "expiration": 1761091200000,
+      "currentRegisteredMembers": 2
+    }
+  ],
+  "appBundles": [
+    {
+      "id": "urbanSuiteAB",
+      "itemId": "ea1dec565b6f4afbb72501433962d8b1",
+      "maximumRegisteredMembers": 200,
+      "expiration": 1761091200000
+    }
+  ],
+  "apps": [
+    {
+      "id": "allsource",
+      "itemId": "0a5e092dee574858a89afa4686386450",
+      "maximumRegisteredMembers": 200,
+      "expiration": 1761091200000
+    }
+  ]
+}

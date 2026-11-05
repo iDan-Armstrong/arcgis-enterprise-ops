@@ -12,7 +12,7 @@ It is the ArcGIS Enterprise counterpart to
 covers the PostgreSQL database underneath, and it feeds the same
 [SIMServo](https://idan-armstrong.github.io/simservo/) training game.
 
-**Status:** v0.2: `egisops server-health`, `services` and `logs`. [docs/SCOPE.md](docs/SCOPE.md) has the plan.
+**Status:** v0.3: `egisops server-health`, `services`, `logs`, `portal-health` and `datastore`. [docs/SCOPE.md](docs/SCOPE.md) has the plan.
 
 ## How this was built, and what that means
 
@@ -118,11 +118,97 @@ logs  https://gis.example.com/arcgis  SEVERE and worse, last 24 hours, 4 entries
 (Both outputs come from the test site, built from Esri's documented response shapes with
 made-up services and log messages.)
 
+## portal-health
+
+Points at the portal (`.../portal`, or the machine on port 7443). Signs in through
+`sharing/rest/generateToken` and reads the Portal Administrator API.
+
+```bash
+egisops portal-health --url https://gis.example.com/portal --user portaladmin
+```
+
+```
+portal-health  https://gis.example.com/portal  Portal for ArcGIS 11.5.0.0
+
+  [ok  ] PTL001  Portal health check: success
+  [ok  ] PTL002  Portal is licensed
+  [WARN] PTL003  Portal machine machine1.example.com (standby) is not ready
+               Machine is not available. The machine status call did not return success. The site is running on its other machine, without a standby.
+  [ok  ] PTL003  Portal machine machine2.example.com (primary) is ready
+  [WARN] PTL004  Portal license userType creatorUT expires in 19 days
+               Get the renewed portal license from My Esri and import it before then; members with an expired user type lose access.
+  [ok  ] PTL005  70 of 1400 member licenses in use
+  [ok  ] PTL006  TLS certificate for gis.example.com expires in 210 days
+  [ok  ] PTL008  3 federated server(s) validated, hosting server machine3.esri.com:6443
+  [WARN] PTL009  Search index does not match the portal content
+               search: 16451 stored, 16000 indexed. Members will not find some content. If indexing is not running, reindex from portaladmin/system/indexer/reindex.
+  [ok  ] PTL010  Portal for ArcGIS 11.5.0.0
+```
+
+(From the test site: Esri's documented responses, with the standby machine's status set
+to an error, one user type set to expire in 19 days, and the search index 451 items short.)
+
+| Code | Check | Source |
+| --- | --- | --- |
+| PTL001 | HTTP 200 and `status: success` | `portaladmin/healthCheck` |
+| PTL002 | Site initialized and licensed | `portaladmin` root |
+| PTL003 | Each machine ready; one down of two is WARN, all down FAIL; a single machine is noted | `machines`, `machines/status/<machine>` |
+| PTL004 | Soonest expiring user type, app bundle, app, extension or capability | `license` |
+| PTL005 | Member licenses in use, and user types with every license assigned | `license` |
+| PTL006, PTL007 | TLS certificate expiry and trust, read from the handshake | the URL you gave |
+| PTL008 | Federated servers: a hosting server exists, and each validates | `federation/servers`, `.../validate` |
+| PTL009 | Search index counts match the stored counts | `system/indexer/status` |
+| PTL010 | Version against the releases this tool targets | `portaladmin` root |
+| PTL000 | A part of the check that could not run | |
+
+## datastore
+
+Points at the hosting ArcGIS Server. Finds the data stores ArcGIS Data Store manages for
+it and runs Esri's `validate` health check on each, then reads the result more strictly
+than its summary line: Esri's own example reports `Healthy` while listing a machine as
+unavailable.
+
+```bash
+egisops datastore --url https://gis.example.com/server --user siteadmin
+```
+
+```
+datastore  https://gis.example.com/arcgis  2 data store(s)
+
+  [ok  ] DST000  2 data store(s) validated (relational, tile cache)
+  [info] DST003  Relational data store ds_d0hv9sqh has no standby machine
+               If its machine fails, hosted feature layers are down until it is restored from backup. A standby machine takes over on its own.
+  [WARN] DST005  Relational data store ds_d0hv9sqh: newest backup 9.0 days old
+               Older than the 7-day target. Check that scheduled backups are on and the backup location has space.
+  [WARN] DST002  Tile cache data store tcs_abcdef8x: 1 of 3 machine(s) unavailable
+               MACHINE3.EXAMPLE.COM. The data store answered without them. Check the machines and the ArcGIS Data Store service on each.
+```
+
+(From the test site: Esri's documented relational and tile cache `validate` examples,
+evaluated nine days after the example's last backup.)
+
+| Code | Meaning |
+| --- | --- |
+| DST000 | How many data stores were validated, or none registered (WARN) |
+| DST001 | The data store's own overall health is not `Healthy` |
+| DST002 | A machine is unreachable, stopped, unhealthy or not accepting connections (FAIL for the primary), or listed as unavailable |
+| DST003 | Relational data store with no standby machine |
+| DST004 | Not registered with the server, or no valid connection to it |
+| DST005 | Age of the newest backup against `--backup-days` (default 7), or no backup recorded |
+| DST006 | Spatiotemporal cluster status (YELLOW warns, RED fails) and unassigned shards |
+| DST009 | A data store could not be found or validated; the rest still ran |
+
+The validate call needs one data store machine name per store. It comes from `--machine`
+or from the data item; [ADR 0005](docs/adr/0005-portal-tokens-and-data-store-machines.md)
+explains why both.
+
 ## Credentials and TLS
 
 - A token from `EGISOPS_TOKEN`, or a user (`--user` or `EGISOPS_USER`) with
   `EGISOPS_PASSWORD` or an interactive prompt. There is no password option.
-- Tokens are requested with `client=referer` and travel in POST bodies, never in URLs.
+- Tokens are requested with `client=referer` and never go in URLs: in POST bodies for
+  ArcGIS Server, and in the `X-Esri-Authorization` header for Portal's GET resources
+  ([ADR 0005](docs/adr/0005-portal-tokens-and-data-store-machines.md)).
 - TLS verification cannot be turned off. A site on a private CA takes `--ca-file`.
 - Esri returns many errors as HTTP 200 with an error body; those are raised, not parsed
   as data.
@@ -148,5 +234,7 @@ made-up services and log messages.)
 | `tests/test_services.py` | Folder walk, stopped and saturated services, one failing folder not stopping the rest |
 | `tests/test_logs.py` | Paging by `endTime`, the documented filter, grouping, milliseconds and seconds both accepted |
 | `tests/test_certificate.py` | Reading a real self-signed certificate from a local TLS server |
+| `tests/test_portal.py` | Every PTL finding and band; token in the header, never the URL; HTML health check; uninitialized site; federation failures named by server and role; public-only run without a token |
+| `tests/test_datastore.py` | Esri's validate examples, including "Healthy" with an unavailable machine; primary vs standby; backup age in ms or s; missing machine names ask for `--machine` |
 | `tests/test_cli.py` | JSON output, token from the environment, and no password or no-verify options |
 | `tests/test_portable.py` | Evaluators import with `socket`, `ssl` and `urllib` blocked |

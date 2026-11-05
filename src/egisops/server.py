@@ -214,6 +214,56 @@ def _days(until: datetime, now: datetime) -> float:
     return (until - now).total_seconds() / 86400
 
 
+def certificate_findings(
+    c: Certificate | None, now: datetime, t: Thresholds, expiry_code: str, trust_code: str
+) -> list[Finding]:
+    """Expiry and trust of a certificate read from the TLS handshake. Shared by
+    server-health and portal-health."""
+    if not c:
+        return []
+    out: list[Finding] = []
+    days = _days(c.not_after, now)
+    sev = (
+        Severity.FAIL
+        if days < t.cert_fail_days
+        else Severity.WARN
+        if days < t.cert_warn_days
+        else Severity.OK
+    )
+    out.append(
+        Finding(
+            expiry_code,
+            sev,
+            f"TLS certificate for {c.host} "
+            + (f"expired {abs(days):.0f} days ago" if days < 0 else f"expires in {days:.0f} days"),
+            ""
+            if sev == Severity.OK
+            else "Renew it and import it on the web adaptor or each machine before it lapses; "
+            "clients refuse expired certificates.",
+            {"not_after": c.not_after.isoformat(), "issuer": c.issuer},
+        )
+    )
+    if not c.trusted:
+        self_signed = c.subject == c.issuer
+        out.append(
+            Finding(
+                trust_code,
+                Severity.WARN,
+                f"{c.host} presents a "
+                + (
+                    "self-signed certificate"
+                    if self_signed
+                    else "certificate this machine does not trust"
+                ),
+                "Browsers, ArcGIS Pro and federation need a certificate they trust. Replace "
+                "it with a CA-signed one (the default self-signed certificate is for setup "
+                "only), or install the private CA on every client.",
+                {"subject": c.subject, "issuer": c.issuer},
+            )
+        )
+    return out
+
+
 def evaluate(s: ServerSnapshot, now: datetime, t: Thresholds = DEFAULTS) -> list[Finding]:
     out: list[Finding] = []
 
@@ -318,51 +368,7 @@ def evaluate(s: ServerSnapshot, now: datetime, t: Thresholds = DEFAULTS) -> list
             )
         )
 
-    c = s.certificate
-    if c:
-        days = _days(c.not_after, now)
-        sev = (
-            Severity.FAIL
-            if days < t.cert_fail_days
-            else Severity.WARN
-            if days < t.cert_warn_days
-            else Severity.OK
-        )
-        out.append(
-            Finding(
-                "SRV005",
-                sev,
-                f"TLS certificate for {c.host} "
-                + (
-                    f"expired {abs(days):.0f} days ago"
-                    if days < 0
-                    else f"expires in {days:.0f} days"
-                ),
-                ""
-                if sev == Severity.OK
-                else "Renew it and import it on the web adaptor or each machine before it lapses; "
-                "clients refuse expired certificates.",
-                {"not_after": c.not_after.isoformat(), "issuer": c.issuer},
-            )
-        )
-        if not c.trusted:
-            self_signed = c.subject == c.issuer
-            out.append(
-                Finding(
-                    "SRV006",
-                    Severity.WARN,
-                    f"{c.host} presents a "
-                    + (
-                        "self-signed certificate"
-                        if self_signed
-                        else "certificate this machine does not trust"
-                    ),
-                    "Browsers, ArcGIS Pro and federation need a certificate they trust. Replace "
-                    "it with a CA-signed one (the default self-signed certificate is for setup "
-                    "only), or install the private CA on every client.",
-                    {"subject": c.subject, "issuer": c.issuer},
-                )
-            )
+    out += certificate_findings(s.certificate, now, t, "SRV005", "SRV006")
 
     if s.full_version:
         major_minor = ".".join(s.full_version.split(".")[:2])

@@ -1,0 +1,37 @@
+{
+  "servers": [
+    {
+      "id": "A5jgUpHKuk8thd8R",
+      "name": "machine1.esri.com:6443",
+      "url": "https://machine1.esri.com/gis",
+      "isHosted": false,
+      "adminUrl": "https://machine1.esri.com:6443/arcgis",
+      "serverRole": "FEDERATED_SERVER",
+      "serverFunction": "ImageHosting,KnowledgeServer",
+      "serverType": "ArcGIS",
+      "webgisServerTrustKey": ""
+    },
+    {
+      "id": "07YfVcO6qk2iwqF7",
+      "name": "machine3.esri.com:6443",
+      "url": "https://machine3.esri.com/gis",
+      "isHosted": true,
+      "adminUrl": "https://machine3.esri.com:6443/arcgis",
+      "serverRole": "HOSTING_SERVER",
+      "serverFunction": "WorkflowManager",
+      "serverType": "ArcGIS",
+      "webgisServerTrustKey": ""
+    },
+    {
+      "id": "ij8kEYiPWA94e30S",
+      "name": "machine4.esri.com:6443",
+      "url": "https://machine4.esri.com/gis",
+      "isHosted": false,
+      "adminUrl": "https://machine4.esri.com:6443/arcgis",
+      "serverRole": "FEDERATED_SERVER",
+      "serverFunction": "RasterAnalytics",
+      "serverType": "ArcGIS",
+      "webgisServerTrustKey": ""
+    }
+  ]
+}

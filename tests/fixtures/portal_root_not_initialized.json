@@ -1,0 +1,18 @@
+{
+  "status": "error",
+  "messages": [
+    "The portal site has not been initialized. Please create a new site and try again."
+  ],
+  "code": 209000,
+  "resources": [
+    "license",
+    "createNewSite",
+    "joinSite",
+    "license/validateLicense"
+  ],
+  "isPortalLicensed": true,
+  "isLicenseFileRequired": true,
+  "isUserTypeLicensing": true,
+  "version": "12.1.0",
+  "currentbuild": "12.1.0.0"
+}

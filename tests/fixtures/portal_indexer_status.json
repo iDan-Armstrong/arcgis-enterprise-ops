@@ -1,0 +1,20 @@
+{
+  "indexes": [
+    {
+      "name": "users",
+      "databaseCount": 118,
+      "indexCount": 118
+    },
+    {
+      "name": "groups",
+      "databaseCount": 455,
+      "indexCount": 455
+    },
+    {
+      "name": "search",
+      "databaseCount": 16451,
+      "indexCount": 16451
+    }
+  ],
+  "syncStatus": true
+}

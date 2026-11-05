@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "egisops"
-version = "0.2.0"
+version = "0.3.0"
 description = "Operations checks for ArcGIS Enterprise on the ArcGIS REST Administrator API"
 readme = "README.md"
 license = { text = "MIT" }

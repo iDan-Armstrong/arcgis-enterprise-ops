@@ -1,0 +1,57 @@
+{
+  "datastore.release": "10.8.0.0",
+  "datastore.name": "tcs_abcdef8x",
+  "sharedbkloc": "//FILESHARE.EXAMPLE.COM/share/bkup/tile/",
+  "datastore.isConfigured": "true",
+  "machines": [
+    {
+      "machine.overallhealth": "Healthy",
+      "datastore.release": "10.8.0.0",
+      "datastore.release.configstore": "1.4",
+      "platform": "Windows",
+      "machine.isReachable": "true",
+      "hostip": "10.11.12.13",
+      "name": "MACHINE.EXAMPLE.COM",
+      "role": "CLUSTER_MEMBER",
+      "dbport": 29081,
+      "initstarttime": 1571091475452,
+      "healthcheck.enable": "true",
+      "status": "Started",
+      "adminurl": "https://MACHINE.EXAMPLE.COM:2443/arcgis/datastoreadmin",
+      "db.isactive": "true",
+      "db.isAccepting": "true",
+      "db.isSiteConnValid": "true"
+    },
+    {
+      "machine.overallhealth": "Healthy",
+      "datastore.release": "10.8.0.0",
+      "datastore.release.configstore": "1.4",
+      "platform": "Windows",
+      "machine.isReachable": "true",
+      "hostip": "10.90.80.71",
+      "name": "MACHINE2.EXAMPLE.COM",
+      "role": "CLUSTER_MEMBER",
+      "dbport": 29081,
+      "initstarttime": 1571091475452,
+      "healthcheck.enable": "true",
+      "status": "Started",
+      "adminurl": "https://MACHINE2.EXAMPLE.COM:2443/arcgis/datastoreadmin",
+      "db.isactive": "true",
+      "db.isAccepting": "true",
+      "db.isSiteConnValid": "true"
+    }
+  ],
+  "unavailableMachines": [
+    "MACHINE3.EXAMPLE.COM"
+  ],
+  "datastore.isRegistered": "true",
+  "datastore.hasValidServerConnection": "true",
+  "datastore.validServerMachinesList": [
+    {
+      "machineName": "GISSERVER.EXAMPLE.COM",
+      "adminURL": "https://GISSERVER.EXAMPLE.COM:6443/arcgis/admin"
+    }
+  ],
+  "owningSystemUrl": "https://GISSERVER.EXAMPLE.COM:6443/arcgis/admin",
+  "datastore.overallhealth": "Healthy"
+}

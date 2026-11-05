@@ -1,0 +1,31 @@
+{
+  "items": [
+    {
+      "path": "/enterpriseDatabases/database1",
+      "type": "egdb",
+      "id": "e8a6e8ab-24a0-4f4c-8b14-47a4c4c4b4a1",
+      "totalRefCount": 0,
+      "info": {
+        "dataStoreConnectionType": "shared",
+        "isManaged": false,
+        "connectionString": "ENCRYPTED_PASSWORD=00022e68...;SERVER=dbserver;INSTANCE=sde:postgresql:dbserver;DBCLIENT=postgresql;DB_CONNECTION_PROPERTIES=dbserver;DATABASE=gisdata;USER=sde;AUTHENTICATION_MODE=DBMS"
+      }
+    },
+    {
+      "path": "/enterpriseDatabases/AGSDataStore_ds_d0hv9sqh",
+      "type": "egdb",
+      "id": "1c1b1f3e-9a2d-4d0b-9c55-6f0f2c7b1e10",
+      "totalRefCount": 0,
+      "info": {
+        "dataStoreConnectionType": "serverOnly",
+        "isManaged": true,
+        "machines": [
+          {
+            "name": "MACHINE.EXAMPLE.COM",
+            "role": "PRIMARY"
+          }
+        ]
+      }
+    }
+  ]
+}
