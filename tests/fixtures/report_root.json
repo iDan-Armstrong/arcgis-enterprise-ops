@@ -1,0 +1,9 @@
+{
+  "reports": [
+    {
+      "folderName": "/", "serviceName": "SampleWorldCities", "type": "MapServer",
+      "status": {"configuredState": "STARTED", "realTimeState": "STARTED"},
+      "instances": {"folderName": "/", "serviceName": "SampleWorldCities", "type": "MapServer", "max": 2, "busy": 0, "free": 2, "initializing": 0, "notCreated": 0, "transactions": 512, "totalBusyTime": 20480, "isStatisticsAvailable": true}
+    }
+  ]
+}

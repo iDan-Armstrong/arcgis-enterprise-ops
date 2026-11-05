@@ -1,0 +1,24 @@
+{
+  "reports": [
+    {
+      "folderName": "Maps", "serviceName": "Stormwater", "type": "MapServer",
+      "status": {"configuredState": "STARTED", "realTimeState": "STARTED"},
+      "instances": {"folderName": "Maps", "serviceName": "Stormwater", "type": "MapServer", "max": 4, "busy": 4, "free": 0, "initializing": 0, "notCreated": 0, "transactions": 90211, "totalBusyTime": 9900000, "isStatisticsAvailable": true}
+    },
+    {
+      "folderName": "Maps", "serviceName": "Sewer", "type": "FeatureServer",
+      "status": {"configuredState": "STARTED", "realTimeState": "STOPPED"},
+      "instances": {"folderName": "Maps", "serviceName": "Sewer", "type": "FeatureServer", "max": 4, "busy": 0, "free": 0, "initializing": 0, "notCreated": 4, "transactions": 0, "totalBusyTime": 0, "isStatisticsAvailable": true}
+    },
+    {
+      "folderName": "Maps", "serviceName": "Parcels", "type": "MapServer",
+      "status": {"configuredState": "STARTED", "realTimeState": "STARTED"},
+      "instances": {"folderName": "Maps", "serviceName": "Parcels", "type": "MapServer", "max": 5, "busy": 4, "free": 1, "initializing": 0, "notCreated": 0, "transactions": 4400, "totalBusyTime": 880000, "isStatisticsAvailable": true}
+    },
+    {
+      "folderName": "Maps", "serviceName": "OldBasemap", "type": "MapServer",
+      "status": {"configuredState": "STOPPED", "realTimeState": "STOPPED"},
+      "instances": {"folderName": "Maps", "serviceName": "OldBasemap", "type": "MapServer", "max": 2, "busy": 0, "free": 0, "initializing": 0, "notCreated": 2, "transactions": 0, "totalBusyTime": 0, "isStatisticsAvailable": true}
+    }
+  ]
+}

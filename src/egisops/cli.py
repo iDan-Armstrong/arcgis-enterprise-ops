@@ -1,6 +1,8 @@
 """egisops command line.
 
     egisops server-health --url https://gis.example.com/arcgis --user siteadmin
+    egisops services      --url https://gis.example.com/arcgis --user siteadmin
+    egisops logs          --url https://gis.example.com/arcgis --hours 24
     EGISOPS_TOKEN=... egisops server-health --url ... --json
 
 Credentials: EGISOPS_TOKEN, or a user (--user or EGISOPS_USER) with EGISOPS_PASSWORD or
@@ -77,21 +79,73 @@ def cmd_server_health(args) -> int:
     return emit(args, header, findings, {"url": snap.base_url, "version": snap.full_version})
 
 
+def cmd_services(args) -> int:
+    from . import services
+
+    admin = connect(args)
+    snap = services.gather(admin, folders=args.folder)
+    findings = services.evaluate(snap)
+    header = [f"services  {admin.base}  {len(snap.services)} service(s)"]
+    return emit(args, header, findings, {"url": admin.base, "folders": snap.folders})
+
+
+def cmd_logs(args) -> int:
+    from . import logs
+
+    admin = connect(args)
+    snap = logs.gather(
+        admin, datetime.now(UTC), hours=args.hours, level=args.level, max_pages=args.max_pages
+    )
+    findings = logs.evaluate(snap)
+    header = [
+        f"logs  {admin.base}  {args.level} and worse, last {args.hours:g} hours, "
+        f"{len(snap.entries)} entries read"
+    ]
+    return emit(args, header, findings, {"url": admin.base, "entries": len(snap.entries)})
+
+
+def _site_args(sp, *, allow_no_login: bool = False):
+    sp.add_argument("--url", required=True, help="Server root, e.g. https://gis.example.com/arcgis")
+    sp.add_argument(
+        "--user", help="Admin user (or EGISOPS_USER); password from EGISOPS_PASSWORD or a prompt"
+    )
+    if allow_no_login:
+        sp.add_argument("--no-login", action="store_true", help="Public checks only")
+    else:
+        sp.set_defaults(no_login=False)
+    sp.add_argument("--ca-file", help="CA bundle for a private certificate authority")
+    sp.add_argument("--json", action="store_true")
+    sp.add_argument("--quiet", action="store_true", help="Hide passing checks")
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="egisops", description=__doc__.splitlines()[0])
     p.add_argument("--version", action="version", version=f"egisops {__version__}")
     sub = p.add_subparsers(dest="command", required=True)
 
     sh = sub.add_parser("server-health", help="Health check, machines, license, TLS certificate")
-    sh.add_argument("--url", required=True, help="Server root, e.g. https://gis.example.com/arcgis")
-    sh.add_argument(
-        "--user", help="Admin user (or EGISOPS_USER); password from EGISOPS_PASSWORD or a prompt"
-    )
-    sh.add_argument("--no-login", action="store_true", help="Public checks only")
-    sh.add_argument("--ca-file", help="CA bundle for a private certificate authority")
-    sh.add_argument("--json", action="store_true")
-    sh.add_argument("--quiet", action="store_true", help="Hide passing checks")
+    _site_args(sh, allow_no_login=True)
     sh.set_defaults(func=cmd_server_health)
+
+    sv = sub.add_parser("services", help="Stopped services and saturated instance pools")
+    _site_args(sv)
+    sv.add_argument(
+        "--folder",
+        action="append",
+        help="Only this folder (repeatable; use '' for root). Default: all",
+    )
+    sv.set_defaults(func=cmd_services)
+
+    lg = sub.add_parser("logs", help="SEVERE log entries grouped by source and code")
+    _site_args(lg)
+    lg.add_argument("--hours", type=float, default=24)
+    lg.add_argument(
+        "--level",
+        default="SEVERE",
+        choices=["SEVERE", "WARNING", "INFO", "FINE", "VERBOSE", "DEBUG"],
+    )
+    lg.add_argument("--max-pages", type=int, default=5)
+    lg.set_defaults(func=cmd_logs)
     return p
 
 

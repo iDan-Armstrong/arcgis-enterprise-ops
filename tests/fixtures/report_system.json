@@ -1,0 +1,9 @@
+{
+  "reports": [
+    {
+      "folderName": "System", "serviceName": "PublishingTools", "type": "GPServer",
+      "status": {"configuredState": "STARTED", "realTimeState": "STARTED"},
+      "instances": {"folderName": "System", "serviceName": "PublishingTools", "type": "GPServer", "max": 4, "busy": 0, "free": 1, "initializing": 0, "notCreated": 3, "transactions": 12, "totalBusyTime": 50000, "isStatisticsAvailable": true}
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "folderName": "/",
+  "description": "Root folder",
+  "webEncrypted": false,
+  "isDefault": true,
+  "folders": ["Maps", "System", "Utilities"],
+  "foldersDetail": [
+    {"folderName": "Maps", "description": null, "webEncrypted": false, "isDefault": false},
+    {"folderName": "System", "description": "Contains system services", "webEncrypted": false, "isDefault": true},
+    {"folderName": "Utilities", "description": "Contains utility services", "webEncrypted": false, "isDefault": true}
+  ],
+  "services": [
+    {"folderName": "/", "serviceName": "SampleWorldCities", "type": "MapServer", "description": ""}
+  ]
+}

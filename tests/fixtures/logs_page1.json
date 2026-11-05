@@ -1,0 +1,10 @@
+{
+  "hasMore": true,
+  "startTime": 1793836800000,
+  "endTime": 1793829600000,
+  "logMessages": [
+    {"type": "SEVERE", "message": "Failed to create the service.", "time": 1793836700000, "source": "Maps/Sewer.FeatureServer", "machine": "MACHINE.EXAMPLE.COM", "user": "", "code": 8252, "elapsed": "", "process": "4012", "thread": "11", "methodName": "", "requestID": "a1"},
+    {"type": "SEVERE", "message": "Failed to create the service.", "time": 1793833100000, "source": "Maps/Sewer.FeatureServer", "machine": "MACHINE2.EXAMPLE.COM", "user": "", "code": 8252, "elapsed": "", "process": "3301", "thread": "9", "methodName": "", "requestID": "a2"},
+    {"type": "SEVERE", "message": "Error performing query operation.", "time": 1793832000000, "source": "Maps/Parcels.MapServer", "machine": "MACHINE.EXAMPLE.COM", "user": "viewer", "code": 10837, "elapsed": "0.31", "process": "4100", "thread": "4", "methodName": "", "requestID": "a3"}
+  ]
+}

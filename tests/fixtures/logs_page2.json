@@ -1,0 +1,8 @@
+{
+  "hasMore": false,
+  "startTime": 1793829600,
+  "endTime": 1793750400,
+  "logMessages": [
+    {"type": "SEVERE", "message": "Failed to create the service.", "time": 1793820000, "source": "Maps/Sewer.FeatureServer", "machine": "MACHINE.EXAMPLE.COM", "user": "", "code": 8252, "elapsed": "", "process": "4012", "thread": "11", "methodName": "", "requestID": "a4"}
+  ]
+}

@@ -12,7 +12,7 @@ It is the ArcGIS Enterprise counterpart to
 covers the PostgreSQL database underneath, and it feeds the same
 [SIMServo](https://idan-armstrong.github.io/simservo/) training game.
 
-**Status:** v0.1, `egisops server-health`. [docs/SCOPE.md](docs/SCOPE.md) has the plan.
+**Status:** v0.2: `egisops server-health`, `services` and `logs`. [docs/SCOPE.md](docs/SCOPE.md) has the plan.
 
 ## How this was built, and what that means
 
@@ -63,6 +63,61 @@ one license set to expire in 19 days, and a self-signed certificate.)
 Exit code is 0 when clean, 1 on warnings, 2 on failures. `--json` gives the same
 findings for other tools. `--no-login` runs only the public checks.
 
+## services
+
+Walks every folder's services report and compares each service's configured state with
+its real-time state, and its busy instances with its maximum.
+
+```
+services  https://gis.example.com/arcgis  6 service(s)
+
+  [info] SVC000  4 service(s) running in 4 folder(s)
+  [WARN] SVC003  Maps/Stormwater.MapServer: all 4 instances busy
+               New requests wait for an instance and can time out. Raise the maximum instances per machine if the machines have memory to spare, or move the service to a dedicated pool.
+  [FAIL] SVC001  Maps/Sewer.FeatureServer should be running but is STOPPED
+               Configured STARTED, real-time not: requests to it fail. Check the logs for the service, then POST services/Maps/Sewer.FeatureServer/start.
+  [info] SVC003  Maps/Parcels.MapServer: 4 of 5 instances busy
+               Close to the pool limit. Watch it at peak hours.
+  [info] SVC002  1 service(s) stopped on purpose
+               Maps/OldBasemap.MapServer
+```
+
+| Code | Meaning |
+| --- | --- |
+| SVC000 | How many services are running, in how many folders |
+| SVC001 | Configured STARTED but not running: requests to it fail |
+| SVC002 | Stopped on purpose (configured STOPPED) |
+| SVC003 | All instances busy (WARN), or at 80% or more (info) |
+| SVC009 | A folder's report could not be read; the rest still ran |
+
+## logs
+
+Queries SEVERE entries for a window (default 24 hours), follows the documented paging,
+and groups them by source and code, so twenty identical errors read as one problem.
+
+```
+logs  https://gis.example.com/arcgis  SEVERE and worse, last 24 hours, 4 entries read
+
+  [WARN] LOG001  4 SEVERE log entries in the last 24 hours
+               Grouped by source and code below. Fix the largest group first.
+  [WARN] LOG002  Maps/Sewer.FeatureServer: code 8252 x3
+               Latest: Failed to create the service.
+               Machines: MACHINE.EXAMPLE.COM (2), MACHINE2.EXAMPLE.COM (1)
+  [WARN] LOG002  Maps/Parcels.MapServer: code 10837 x1
+               Latest: Error performing query operation.
+               Machines: MACHINE.EXAMPLE.COM (1)
+```
+
+| Code | Meaning |
+| --- | --- |
+| LOG001 | Total SEVERE entries in the window |
+| LOG002 | One group: source, code, count, latest message, machines. FAIL at 50 or more |
+| LOG003 | Stopped at the page limit; more entries exist |
+| LOG009 | The query could not run |
+
+(Both outputs come from the test site, built from Esri's documented response shapes with
+made-up services and log messages.)
+
 ## Credentials and TLS
 
 - A token from `EGISOPS_TOKEN`, or a user (`--user` or `EGISOPS_USER`) with
@@ -79,6 +134,8 @@ findings for other tools. `--no-login` runs only the public checks.
   which is what lets SIMServo run them in a browser.
 - **Direct REST, standard library.** No ArcGIS API for Python
   ([ADR 0002](docs/adr/0002-direct-rest-standard-library.md)).
+- **Where the docs are ambiguous, take the documented default or accept both.**
+  ([ADR 0004](docs/adr/0004-ambiguous-docs.md))
 - **Partial failure is a finding.** A call that fails (missing token, one machine
   unreachable) becomes SRV000 and the rest of the check still runs.
 
@@ -88,6 +145,8 @@ findings for other tools. `--no-login` runs only the public checks.
 | --- | --- |
 | `tests/test_client.py` | Token request shape; token in the body not the URL; Esri error bodies with HTTP 200; non-JSON responses |
 | `tests/test_server.py` | Every finding and band against the documented response shapes; partial failure |
+| `tests/test_services.py` | Folder walk, stopped and saturated services, one failing folder not stopping the rest |
+| `tests/test_logs.py` | Paging by `endTime`, the documented filter, grouping, milliseconds and seconds both accepted |
 | `tests/test_certificate.py` | Reading a real self-signed certificate from a local TLS server |
 | `tests/test_cli.py` | JSON output, token from the environment, and no password or no-verify options |
 | `tests/test_portable.py` | Evaluators import with `socket`, `ssl` and `urllib` blocked |

@@ -13,4 +13,7 @@ it with dates relative to the test clock.
 | `licenses.json` | [Licenses](https://developers.arcgis.com/rest/enterprise-administration/server/licenses/) |
 | `generate_token.json` | [Generate Token](https://developers.arcgis.com/rest/enterprise-administration/server/generatetoken/) |
 | `healthcheck_ok.json` | [Health Check](https://developers.arcgis.com/rest/services-reference/enterprise/health-check/) |
+| `services_root.json` | [Services/Root Folder](https://developers.arcgis.com/rest/enterprise-administration/server/services/) (a `Maps` folder added) |
+| `report_*.json` | [Services Report](https://developers.arcgis.com/rest/enterprise-administration/server/servicesreport/). Esri's example is not valid JSON as printed (missing quotes and commas); these use its keys in valid JSON. Service names and counts are made up. |
+| `logs_page*.json` | [Query - Logs](https://developers.arcgis.com/rest/enterprise-administration/server/logsquery/). Page 2 uses seconds instead of milliseconds on purpose, because Esri's own sample does; the parser must accept both. Messages and codes are illustrative. |
 | `error_token_required.json` | The `{"status": "error", "messages": [...]}` error form the Administrator API uses. The message text is illustrative. |
