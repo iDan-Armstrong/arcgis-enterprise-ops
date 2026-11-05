@@ -5,6 +5,7 @@
     egisops logs          --url https://gis.example.com/arcgis --hours 24
     egisops portal-health --url https://gis.example.com/portal --user portaladmin
     egisops datastore     --url https://gis.example.com/server --user siteadmin
+    egisops backup-check  --properties webgisdr.properties --backups D:\\backups --rpo-hours 24
     EGISOPS_TOKEN=... egisops server-health --url ... --json
 
 Credentials: EGISOPS_TOKEN, or a user (--user or EGISOPS_USER) with EGISOPS_PASSWORD or
@@ -134,6 +135,24 @@ def cmd_datastore(args) -> int:
     )
 
 
+def cmd_backup_check(args) -> int:
+    from . import backup
+
+    snap = backup.gather(args.properties, backups_dir=args.backups, outputs=args.output_file or ())
+    findings = backup.evaluate(snap, datetime.now(UTC), backup.Thresholds(rpo_hours=args.rpo_hours))
+    header = [
+        f"backup-check  {args.properties}"
+        + (f"  backups in {snap.backups_dir}" if snap.backups_dir else "")
+        + f"  RPO {args.rpo_hours:g}h"
+    ]
+    extra = {
+        "properties": backup.safe_properties(snap.properties),
+        "backups_dir": snap.backups_dir,
+        "backups": len(snap.backups or []),
+    }
+    return emit(args, header, findings, extra)
+
+
 def _site_args(sp, *, allow_no_login: bool = False):
     sp.add_argument(
         "--url",
@@ -196,6 +215,21 @@ def build_parser() -> argparse.ArgumentParser:
         "--backup-days", type=float, default=7, help="Warn when the newest backup is older"
     )
     ds.set_defaults(func=cmd_datastore)
+
+    bk = sub.add_parser(
+        "backup-check", help="WebGISDR properties lint and newest backup against an RPO (offline)"
+    )
+    bk.add_argument("--properties", required=True, help="The webgisdr.properties file")
+    bk.add_argument("--backups", help="Folder holding .webgissite files (default: BACKUP_LOCATION)")
+    bk.add_argument(
+        "--output-file",
+        action="append",
+        help="JSON written by webgisdr --output (repeatable; the newest is scored)",
+    )
+    bk.add_argument("--rpo-hours", type=float, default=24, help="Recovery point objective")
+    bk.add_argument("--json", action="store_true")
+    bk.add_argument("--quiet", action="store_true", help="Hide passing checks")
+    bk.set_defaults(func=cmd_backup_check)
     return p
 
 

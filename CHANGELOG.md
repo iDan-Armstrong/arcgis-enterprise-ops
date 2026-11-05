@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0 (2026-11-04)
+
+- `egisops backup-check`: offline check of a WebGISDR setup. Lints `webgisdr.properties`
+  (required keys for FileSystem, AmazonS3 and AzureBlob, portal URL, doubled backslashes,
+  secrets still in plain text, access keys and SAS tokens, mode, shared location), scores
+  the newest `.webgissite` against `--rpo-hours` (WARN past it, FAIL past three times it),
+  and reads the JSON from `webgisdr --output` for the last run's per-component result.
+- Secret values never appear in output; `--json` shows `<set>`.
+- ADR 0006: backup-check works on files, offline, and never repeats a secret.
+
 ## 0.3.0 (2026-11-04)
 
 - `egisops portal-health`: portal health check, site and license, each machine's

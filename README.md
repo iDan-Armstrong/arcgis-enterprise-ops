@@ -12,7 +12,7 @@ It is the ArcGIS Enterprise counterpart to
 covers the PostgreSQL database underneath, and it feeds the same
 [SIMServo](https://idan-armstrong.github.io/simservo/) training game.
 
-**Status:** v0.3: `egisops server-health`, `services`, `logs`, `portal-health` and `datastore`. [docs/SCOPE.md](docs/SCOPE.md) has the plan.
+**Status:** v0.4: `egisops server-health`, `services`, `logs`, `portal-health`, `datastore` and `backup-check`. [docs/SCOPE.md](docs/SCOPE.md) has the plan.
 
 ## How this was built, and what that means
 
@@ -202,6 +202,52 @@ The validate call needs one data store machine name per store. It comes from `--
 or from the data item; [ADR 0005](docs/adr/0005-portal-tokens-and-data-store-machines.md)
 explains why both.
 
+## backup-check
+
+Checks an ArcGIS Enterprise backup setup from its files, with no network calls: the
+`webgisdr.properties` file, the folder the `.webgissite` backups land in, and the JSON
+that `webgisdr --export --output <file>` writes. Run it after the scheduled backup and
+the exit code says whether last night's backup is good.
+
+```bash
+egisops backup-check --properties webgisdr.properties --backups \\fileserver\wgbackups \
+    --output-file last-run.json --rpo-hours 24
+```
+
+```
+backup-check  webgisdr.properties  backups in /backups  RPO 24h
+
+  [ok  ] BAK001  Properties complete for FileSystem
+  [WARN] BAK004  Stored in plain text: PORTAL_ADMIN_PASSWORD
+               WebGISDR encrypts these the first time it runs with the file. Run it once (or check that it has run), and keep the file readable only by the account that runs backups.
+  [info] BAK007  Not in a WebGISDR backup: map and tile caches, referenced data, spatiotemporal store
+               Back up arcgiscache directories, file and database data sources behind services, and the spatiotemporal big data store (backupdatastore) separately.
+  [WARN] BAK010  Newest backup 34.0 hours old (20261103-020000-EST-BACKUP.webgissite, 5.8 GB)
+               Older than the 24-hour recovery point objective: a restore today loses everything since 2026-11-03 02:00 UTC. Check the scheduled task that runs webgisdr --export.
+  [FAIL] BAK011  Last WebGISDR run failed at 2026-11-04 07:00 UTC: ArcGIS Data Store (relational)
+               Failed to back up one or more components. Unable to connect to the ArcGIS Data Store machine. Fix the component and run the export again; the newest backup file may not be complete.
+```
+
+(Esri's FileSystem example properties file, two made-up backup files 34 and 58 hours old,
+and Esri's sample output with the relational Data Store component set to failed, written
+five hours earlier; clock fixed at 2026-11-04 12:00 UTC.)
+
+| Code | Meaning |
+| --- | --- |
+| BAK001 | Required properties for the store provider are set |
+| BAK002 | `PORTAL_ADMIN_URL` is HTTPS and points at a portal machine on 7443 |
+| BAK003 | A path with single backslashes, which the properties format drops |
+| BAK004 | Passwords or keys still in plain text; S3 access keys (info); Azure SAS tokens (WARN) |
+| BAK005 | Unknown mode (FAIL); incremental mode and what it depends on (info) |
+| BAK006 | `SHARED_LOCATION` blank: required with federated servers at 12.0 or earlier |
+| BAK007 | What a WebGISDR backup does not contain |
+| BAK010 | Newest backup by modified time (the one a folder restore picks) against the RPO; none, or empty files |
+| BAK011 | The last run's status and failed components; its backup missing from the folder |
+| BAK009 | A file could not be read |
+
+Secrets in the properties file are read only to see whether they are set and encrypted.
+They never appear in output ([ADR 0006](docs/adr/0006-backup-check-works-on-files.md)).
+
 ## Credentials and TLS
 
 - A token from `EGISOPS_TOKEN`, or a user (`--user` or `EGISOPS_USER`) with
@@ -236,5 +282,6 @@ explains why both.
 | `tests/test_certificate.py` | Reading a real self-signed certificate from a local TLS server |
 | `tests/test_portal.py` | Every PTL finding and band; token in the header, never the URL; HTML health check; uninitialized site; federation failures named by server and role; public-only run without a token |
 | `tests/test_datastore.py` | Esri's validate examples, including "Healthy" with an unavailable machine; primary vs standby; backup age in ms or s; missing machine names ask for `--machine` |
+| `tests/test_backup.py` | Esri's three example properties files; escaping; secrets absent from all output; RPO bands; newest by modified time, not name; incremental and full; Esri's output file, success and failure |
 | `tests/test_cli.py` | JSON output, token from the environment, and no password or no-verify options |
 | `tests/test_portable.py` | Evaluators import with `socket`, `ssl` and `urllib` blocked |

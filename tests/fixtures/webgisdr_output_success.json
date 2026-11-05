@@ -1,0 +1,48 @@
+{
+  "backupLocation": "\\\\backupServer\\backups\\full\\20221123-133229-PST-FULL.webgissite",
+  "backupLocationType": "FileSystem",
+  "messages": "",
+  "operation": "restore",
+  "results": [
+    {
+      "name": "Portal for ArcGIS",
+      "messages": "",
+      "URL": "https://portal.example.com/portal",
+      "status": "success",
+      "elapsedTime": "00hr:07min:55sec"
+    },
+    {
+      "name": "ArcGIS Server",
+      "messages": "",
+      "URL": "https://server.example.com/server",
+      "status": "success",
+      "elapsedTime": "00hr:01min:07sec"
+    },
+    {
+      "name": "ArcGIS Server",
+      "messages": "",
+      "URL": "https://server.example.com/server",
+      "status": "success",
+      "elapsedTime": "00hr:01min:10sec"
+    },
+    {
+      "storeType": "relational",
+      "name": "ArcGIS Data Store",
+      "messages": "",
+      "URL": "https://datastore.example.com:2443/arcgis",
+      "status": "success",
+      "elapsedTime": "00hr:03min:20sec"
+    },
+    {
+      "storeType": "tileCache",
+      "name": "ArcGIS Data Store",
+      "messages": "",
+      "URL": "https://datastore.example.com:2443/arcgis",
+      "status": "success",
+      "elapsedTime": "00hr:00min:15sec"
+    }
+  ],
+  "status": "success",
+  "elapsedTime": "00hr:13min:24sec",
+  "zipTime": "00hr:00min:16sec"
+}

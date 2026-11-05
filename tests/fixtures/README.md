@@ -40,3 +40,11 @@ it with dates relative to the test clock.
 | `validate_bigdata.json` | Same page, example four, commas fixed. |
 | `find_items_egdb.json` | [Find Data Items](https://developers.arcgis.com/rest/enterprise-administration/server/finddataitems/). The first item follows Esri's example. The second, a managed `AGSDataStore_ds_` item with `isManaged: true` and an `info.machines` list, is constructed: Esri's example shows only unmanaged items, and the `machines` list is not documented (ADR 0005). |
 | `find_items_nosql.json` | Constructed the same way, for a tile cache data store. |
+
+## WebGISDR backups (v0.4)
+
+| File | Source |
+| --- | --- |
+| `webgisdr_filesystem.properties`, `webgisdr_s3.properties`, `webgisdr_azure.properties` | The three examples on [WebGISDR tool properties file](https://doc.esri.com/en/arcgis-enterprise/latest/administer/populate-webgisdr-tool-properties-file.html), verbatim, including their example passwords. Esri's Azure example sets no credential type. |
+| `webgisdr_output_success.json` | [WebGISDR tool output file](https://doc.esri.com/en/arcgis-enterprise/latest/administer/webgisdr-tool-output-file.html), verbatim. It describes a backup but says `"operation": "restore"`; the check does not rely on that field. |
+| `webgisdr_output_failure.json` | The same sample with the relational Data Store component failed. The failure messages are illustrative. |

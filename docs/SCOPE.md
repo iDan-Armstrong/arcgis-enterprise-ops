@@ -9,7 +9,7 @@ Agreed 2026-11-04. Targets ArcGIS Enterprise 11.5 and 12.x.
 | v0.1 (released) | `server-health` | Health check, licensed, machine states, license expiry, TLS certificate expiry and trust, version |
 | v0.2 (released) | `services`, `logs` | Stopped services, service pools at max instances, SEVERE log entries grouped by service |
 | v0.3 (released) | `portal-health`, `datastore` | Portal health, machines, license and member capacity, TLS certificate, federated server validation, search index; Data Store validation, machines, standby, server connection, backup age |
-| v0.4 | `backup-check` | `webgisdr` properties lint and age of the newest `.webgissite` backup against an RPO target |
+| v0.4 (released) | `backup-check` | `webgisdr` properties lint (provider keys, escaping, plain-text secrets, mode, portal URL), newest `.webgissite` against an RPO target, last run's output file |
 | v0.5 | `stack-compat` | Enterprise version cross-checked with rdsops `compat` for the RDS geodatabase |
 
 ## Facts the design rests on (checked 2026-11-04)
@@ -30,6 +30,10 @@ Agreed 2026-11-04. Targets ArcGIS Enterprise 11.5 and 12.x.
 | `system/indexer/status` gives database and index counts for users, groups and search; a mismatch after indexing finishes means reindex | [Status - Indexer](https://developers.arcgis.com/rest/enterprise-administration/portal/indexer-status/) |
 | Data Store `validate` returns `datastore.overallhealth`, per-machine reachability, status, role and `db.isAccepting`, `unavailableMachines`, registration, server connection and `datastore.lastbackup` (epoch ms); Esri's own example reports `Healthy` with a machine unavailable | [Validate (Data Store)](https://developers.arcgis.com/rest/enterprise-administration/server/validatedatastore/) |
 | `data/findItems` with `parentPath=/enterpriseDatabases&types=egdb`; items carry `info.isManaged` | [Find Data Items](https://developers.arcgis.com/rest/enterprise-administration/server/finddataitems/), [Data Item](https://developers.arcgis.com/rest/enterprise-administration/server/dataitem/) |
+| `webgisdr.properties` keys per store provider (FileSystem, AmazonS3, AzureBlob); backslashes in paths must be doubled; passwords and keys are encrypted the first time the tool runs | [WebGISDR tool properties file](https://doc.esri.com/en/arcgis-enterprise/latest/administer/populate-webgisdr-tool-properties-file.html) |
+| `webgisdr --output` writes JSON with `status`, `backupLocation`, `elapsedTime` and per-component `results` | [WebGISDR tool output file](https://doc.esri.com/en/arcgis-enterprise/latest/administer/webgisdr-tool-output-file.html) |
+| A folder restore takes the newest `.webgissite` by last-modified time; backup files are named `<timestamp>.webgissite` | [WebGISDR tool properties file](https://doc.esri.com/en/arcgis-enterprise/latest/administer/populate-webgisdr-tool-properties-file.html), [Create an ArcGIS Enterprise backup](https://doc.esri.com/en/arcgis-enterprise/latest/administer/create-web-gis-backup.html) |
+| Not in a WebGISDR backup: map and tile caches, referenced data, the spatiotemporal big data store; incremental mode needs Data Store scheduled backups with point-in-time recovery | [ArcGIS Enterprise backups](https://doc.esri.com/en/arcgis-enterprise/latest/administer/overview-backup-restore-web-gis.html) |
 | `webgisdr` backs up Portal items, hosted layers, federated server settings and Data Store data, not map or tile caches | [Create an ArcGIS Enterprise backup](https://doc.esri.com/en/arcgis-enterprise/latest/administer/create-web-gis-backup.html) |
 
 ## Out of scope

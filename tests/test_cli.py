@@ -52,3 +52,30 @@ def test_cli_datastore_json(monkeypatch, capsys):
     out = json.loads(capsys.readouterr().out)
     assert len(out["stores"]) == 2
     assert code == 1  # unavailable tile cache machine, and the example backup is years old
+
+
+def test_cli_backup_check_json_has_no_secrets(tmp_path, capsys):
+    import os
+    from datetime import UTC, datetime
+
+    from conftest import FIXTURES
+
+    f = tmp_path / "20261104-020000-EST-BACKUP.webgissite"
+    f.write_bytes(b"x" * 100)
+    now = datetime.now(UTC).timestamp()
+    os.utime(f, (now - 3600, now - 3600))
+    code = cli.main(
+        [
+            "backup-check",
+            "--properties",
+            str(FIXTURES / "webgisdr_filesystem.properties"),
+            "--backups",
+            str(tmp_path),
+            "--json",
+        ]
+    )
+    raw = capsys.readouterr().out
+    assert "Th3.Ad.Pass" not in raw
+    out = json.loads(raw)
+    assert out["properties"]["PORTAL_ADMIN_PASSWORD"] == "<set>"
+    assert out["backups"] == 1 and code == 1  # plain-text password warns
