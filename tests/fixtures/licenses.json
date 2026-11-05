@@ -1,0 +1,12 @@
+{
+  "edition": {"name": "svradvanced", "version": "11.5", "canExpire": true, "expiration": 1322553600000},
+  "level": {"name": "svrenterprise", "version": "11.5", "canExpire": true, "expiration": 1322553600000},
+  "datafeature": {"name": "arcsdeserver", "version": "11.5", "canExpire": true, "expiration": 1322553600000},
+  "extensions": [
+    {"name": "interopserver", "version": "11.5", "appid": "", "canExpire": true, "expiration": 1322553600000}
+  ],
+  "features": [
+    {"name": "esriServerLicenseAdvanced", "displayName": "ArcGIS Server Advanced", "version": "11.5", "coreCount": 4, "canExpire": true, "expiration": 1322553600000},
+    {"name": "esriServerInterop", "displayName": "Data Interoperability", "version": "11.5", "coreCount": 0, "canExpire": true, "expiration": 1322553600000}
+  ]
+}

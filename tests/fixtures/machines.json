@@ -1,0 +1,6 @@
+{
+  "machines": [
+    {"machineName": "MACHINE.EXAMPLE.COM", "adminURL": "https://MACHINE.EXAMPLE.COM:6443/arcgis/admin"},
+    {"machineName": "MACHINE2.EXAMPLE.COM", "adminURL": "https://MACHINE2.EXAMPLE.COM:6443/arcgis/admin"}
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "isServerLicensed": "true",
+  "resources": ["machines", "clusters", "system", "services", "security", "data", "uploads", "logs", "mode", "usagereports", "webhooks"],
+  "currentVersion": 11.5,
+  "fullVersion": "11.5.0",
+  "acceptLanguage": "en-US,en;q=0.9"
+}

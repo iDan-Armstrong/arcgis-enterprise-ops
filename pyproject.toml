@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "egisops"
+version = "0.1.0"
+description = "Operations checks for ArcGIS Enterprise on the ArcGIS REST Administrator API"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Daniel Armstrong" }]
+requires-python = ">=3.11"
+dependencies = []  # standard library only, on purpose (ADR 0002)
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+egisops = "egisops.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
