@@ -1,0 +1,23 @@
+{
+  "securityEnabled": true,
+  "authenticationMode": "ARCGIS_PORTAL_TOKEN",
+  "authenticationTier": "ARCGIS_PORTAL",
+  "sslEnabled": true,
+  "HSTSEnabled": false,
+  "httpsProtocols": "TLSv1.2,TLSv1.3",
+  "httpEnabled": false,
+  "virtualDirsSecurityEnabled": false,
+  "allowInternetCORSAccess": false,
+  "allowDirectAccess": true,
+  "serverRole": "FEDERATED_SERVER",
+  "serverFunction": "",
+  "portalProperties": {
+    "portalUrl": "https://gis.example.com/portal",
+    "privatePortalUrl": "https://portal.example.com:7443/arcgis",
+    "portalSecretKey": "PORTAL-SECRET-DO-NOT-PRINT",
+    "portalMode": "ARCGIS_PORTAL_FEDERATION",
+    "serverId": "abc123",
+    "serverUrl": "https://gis.example.com/arcgis",
+    "webgisServerTrustKey": "TRUST-KEY-DO-NOT-PRINT"
+  }
+}

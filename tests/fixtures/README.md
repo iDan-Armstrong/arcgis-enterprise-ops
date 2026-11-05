@@ -48,3 +48,15 @@ it with dates relative to the test clock.
 | `webgisdr_filesystem.properties`, `webgisdr_s3.properties`, `webgisdr_azure.properties` | The three examples on [WebGISDR tool properties file](https://doc.esri.com/en/arcgis-enterprise/latest/administer/populate-webgisdr-tool-properties-file.html), verbatim, including their example passwords. Esri's Azure example sets no credential type. |
 | `webgisdr_output_success.json` | [WebGISDR tool output file](https://doc.esri.com/en/arcgis-enterprise/latest/administer/webgisdr-tool-output-file.html), verbatim. It describes a backup but says `"operation": "restore"`; the check does not rely on that field. |
 | `webgisdr_output_failure.json` | The same sample with the relational Data Store component failed. The failure messages are illustrative. |
+
+## Security (v0.6)
+
+| File | Source |
+| --- | --- |
+| `security_config.json` | [Security Configuration](https://developers.arcgis.com/rest/enterprise-administration/server/securityconfig/), its documented keys. Secret values replaced with marked placeholders (`...-DO-NOT-PRINT`) that tests look for in output. |
+| `security_tokens.json` | [Tokens](https://developers.arcgis.com/rest/enterprise-administration/server/tokens/), Esri's example including its sample `sharedKey` (quoted here; Esri's example is not valid JSON). |
+| `security_psa.json` | The `disabled` flag of the primary site administrator resource. |
+| `system_properties.json` | Empty properties: the documented defaults apply (standardized queries on). |
+| `servicesdirectory.json`, `webadaptors.json` | The `enabled` and `allowedOrigins` keys of the services directory handler, and `webAdaptors` with `webAdaptorURL`. Values are illustrative. |
+| `portal_security_config.json`, `portal_self.json` | Portal `security/config` and `portals/self` keys used by the check. Values are illustrative; the trust key is a marked placeholder. |
+

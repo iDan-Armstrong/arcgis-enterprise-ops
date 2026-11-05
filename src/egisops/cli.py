@@ -8,6 +8,9 @@
     egisops stack-compat  --url https://gis.example.com/server --portal-version 11.5 \
                           --engine-version 16.8 --postgis 3.5.2 --target 12.1
     egisops backup-check  --properties webgisdr.properties --backups D:\\backups --rpo-hours 24
+    egisops security      --url https://gis.example.com/server --user siteadmin
+    egisops security      --url https://gis.example.com/portal --portal --user portaladmin
+    egisops incident      --kind token --server https://gis.example.com/server --federal
     EGISOPS_TOKEN=... egisops server-health --url ... --json
 
 Credentials: EGISOPS_TOKEN, or a user (--user or EGISOPS_USER) with EGISOPS_PASSWORD or
@@ -180,6 +183,66 @@ def cmd_backup_check(args) -> int:
     return emit(args, header, findings, extra)
 
 
+def cmd_security(args) -> int:
+    from . import security
+
+    now = datetime.now(UTC)
+    if args.portal:
+        snap = security.gather_portal(connect(args, portal=True))
+        findings = security.evaluate_portal(snap, now)
+    else:
+        snap = security.gather_server(connect(args))
+        findings = security.evaluate_server(snap, now)
+    if args.verbose:
+        findings += security.not_checked(args.portal)
+    kind = "portal" if args.portal else "server"
+    header = [f"security  {snap.base_url}  ({kind}, against Esri's {kind}Scan checks)"]
+    return emit(args, header, findings, {"url": snap.base_url})
+
+
+def cmd_incident(args) -> int:
+    from . import incident
+
+    ctx = incident.IncidentContext(
+        kind=args.kind,
+        server=args.server or "https://<server>/arcgis",
+        portal=args.portal_url,
+        federal=args.federal,
+        user=args.account,
+        service=args.service,
+        item=args.item,
+        machine=args.machine,
+        since=datetime.fromisoformat(args.since) if args.since else None,
+        now=datetime.now(UTC),
+        backup_age_hours=args.backup_age_hours,
+        rpo_hours=args.rpo_hours,
+        psa_enabled=True if args.psa_enabled else None,
+    )
+    pb = incident.playbook(ctx)
+    if args.json:
+        print(json.dumps(pb.to_dict(), indent=2, default=str))
+        return exit_code(pb.findings)
+    header = [
+        f"incident  {args.kind}: {incident.KINDS[args.kind]}",
+        f"  server {ctx.server}"
+        + (f"  portal {ctx.portal}" if ctx.portal else "")
+        + ("  federal" if args.federal else ""),
+    ]
+    code = emit(args, header, pb.findings, {})
+    print("\n  Playbook (nothing here has been run)")
+    phase = None
+    for n, st in enumerate(pb.steps, 1):
+        if st.phase != phase:
+            phase = st.phase
+            print(f"\n  {phase}")
+        print(f"  {n:>2}. {st.title}")
+        if st.command:
+            print(f"      {'$' if incident.is_command(st.command) else '>'} {st.command}")
+        if st.why:
+            print(f"      {st.why}")
+    return code
+
+
 def _site_args(sp, *, allow_no_login: bool = False):
     sp.add_argument(
         "--url",
@@ -276,6 +339,31 @@ def build_parser() -> argparse.ArgumentParser:
     bk.add_argument("--json", action="store_true")
     bk.add_argument("--quiet", action="store_true", help="Hide passing checks")
     bk.set_defaults(func=cmd_backup_check)
+
+    se = sub.add_parser("security", help="Settings against Esri's serverScan and portalScan checks")
+    _site_args(se)
+    se.add_argument("--portal", action="store_true", help="The URL is a portal")
+    se.add_argument("--verbose", action="store_true", help="Also list scanner checks not read")
+    se.set_defaults(func=cmd_security)
+
+    from .incident import KINDS
+
+    ic = sub.add_parser("incident", help="Contingency playbook for a security incident (prints)")
+    ic.add_argument("--kind", required=True, choices=sorted(KINDS))
+    ic.add_argument("--server", help="Server root, e.g. https://gis.example.com/server")
+    ic.add_argument("--portal-url", help="Portal root, if the server is federated")
+    ic.add_argument("--account", help="The account involved")
+    ic.add_argument("--service", help="folder/name.Type, e.g. Utilities/Hydrants.MapServer")
+    ic.add_argument("--item", help="Portal item id")
+    ic.add_argument("--machine", help="Site machine name")
+    ic.add_argument("--since", help="Last known good time, ISO 8601")
+    ic.add_argument("--backup-age-hours", type=float, help="Age of the newest webgisdr backup")
+    ic.add_argument("--rpo-hours", type=float, default=24)
+    ic.add_argument("--psa-enabled", action="store_true", help="The PSA account is enabled")
+    ic.add_argument("--federal", action="store_true", help="Federal system: CISA one-hour report")
+    ic.add_argument("--json", action="store_true")
+    ic.add_argument("--quiet", action="store_true")
+    ic.set_defaults(func=cmd_incident)
     return p
 
 

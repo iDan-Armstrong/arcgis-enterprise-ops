@@ -1,0 +1,8 @@
+{
+  "disableServicesDirectory": false,
+  "enableAutomaticAccountCreation": true,
+  "webgisServerTrustKey": "TRUST-KEY-DO-NOT-PRINT",
+  "userStoreConfig": {
+    "type": "BUILTIN"
+  }
+}

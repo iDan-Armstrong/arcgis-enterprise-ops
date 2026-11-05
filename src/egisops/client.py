@@ -161,6 +161,17 @@ class PortalAdmin:
         _raise_for_esri_error(payload, path or "portaladmin")
         return payload
 
+    def sharing(self, path: str) -> dict:
+        """GET a sharing/rest resource (portals/self, for example) the same way."""
+        url = f"{self.base}/sharing/rest/{path.lstrip('/')}".rstrip("/") + "?f=json"
+        status, body = self.transport("GET", url, None, self._headers())
+        try:
+            payload = json.loads(body)
+        except ValueError as e:
+            raise AdminError(f"sharing/rest/{path}: HTTP {status}, not JSON") from e
+        _raise_for_esri_error(payload, f"sharing/rest/{path}")
+        return payload
+
     def healthcheck(self) -> tuple[int, dict | None]:
         """HTTP 200 and status=success when the machine can take requests. An unavailable
         machine answers with something other than 200, often an HTML page."""

@@ -1,0 +1,10 @@
+{
+  "webAdaptors": [
+    {
+      "id": "wa1",
+      "webAdaptorURL": "https://gis.example.com/arcgis",
+      "machineName": "wa.example.com",
+      "isAdminEnabled": false
+    }
+  ]
+}

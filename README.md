@@ -12,7 +12,7 @@ It is the ArcGIS Enterprise counterpart to
 covers the PostgreSQL database underneath, and it feeds the same
 [SIMServo](https://idan-armstrong.github.io/simservo/) training game.
 
-**Status:** v0.5: `egisops server-health`, `services`, `logs`, `portal-health`, `datastore`, `backup-check` and `stack-compat`. [docs/SCOPE.md](docs/SCOPE.md) has the plan.
+**Status:** v0.6: `egisops server-health`, `services`, `logs`, `portal-health`, `datastore`, `backup-check`, `stack-compat`, `security` and `incident`. [docs/SCOPE.md](docs/SCOPE.md) has the plan.
 
 ## How this was built, and what that means
 
@@ -289,6 +289,127 @@ five hours earlier; clock fixed at 2026-11-04 12:00 UTC.)
 Secrets in the properties file are read only to see whether they are set and encrypted.
 They never appear in output ([ADR 0006](docs/adr/0006-backup-check-works-on-files.md)).
 
+## security
+
+Reads the settings Esri's own scanners (serverScan.py and portalScan.py) look at, through
+the Administrator API, and puts the scanner's check ID on each finding.
+
+```bash
+egisops security --url https://gis.example.com/server --user siteadmin
+egisops security --url https://gis.example.com/portal --portal --user portaladmin
+```
+
+```
+security  https://gis.lakeshore.example/server  (server, against Esri's serverScan checks)
+
+  [FAIL] ESC001  Protocol is HTTP_AND_HTTPS
+               Tokens and credentials can cross the network in clear text. Set the protocol to HTTPS in security/config/update; HTTP calls are then redirected.
+  [WARN] ESC001  Old TLS versions enabled: TLSv1.1
+               TLS 1.2 and 1.3 are the defaults. Remove the old versions from httpsProtocols unless a named client still needs them.
+  [ok  ] ESC002  Standardized queries enforced
+  [FAIL] ESC003  Tokens can be requested with GET
+               Usernames and passwords then appear in URLs, proxy logs and browser history. Set allowHttpGet to false in security/tokens.
+  [WARN] ESC004  The REST services directory is browsable
+               It lists every service to anyone who can reach the site. Turn it off in production (system/handlers/rest/servicesdirectory/edit, enabled=false).
+  [WARN] ESC004  Cross-domain requests are allowed from any site
+               Set allowedOrigins to the web apps that need this server.
+  [ok  ] ESC005  Web Adaptors registered over HTTPS
+  [info] ESC005  Administrators can still reach the server directly
+               allowDirectAccess is true, so the admin API answers on the server port as well as through the Web Adaptor. Set it to false, or limit allowedAdminAccessIPs, if every administrator can go through the Web Adaptor.
+  [info] ESC005  Output, job and input directories do not require sign-in
+               With virtualDirsSecurityEnabled false, files written to arcgisoutput, arcgisjobs and arcgisinput can be fetched by URL. Turn it on if secured services write there.
+  [WARN] ESC006  The primary site administrator account is enabled
+               It cannot be locked out and is not in the identity store. Disable it once another administrator works (security/psa/disable); it can be re-enabled from the machine if needed.
+  [ok  ] ESC007  TLS certificate for gisserver.lakeshore.example expires in 200 days
+  [WARN] ESC007  gisserver.lakeshore.example presents a self-signed certificate
+               Browsers, ArcGIS Pro and federation need a certificate they trust. Replace it with a CA-signed one (the default self-signed certificate is for setup only), or install the private CA on every client.
+```
+
+(Evaluated on settings for a deliberately misconfigured lab server, clock fixed at
+2026-11-05 12:00 UTC; with `--url` they come from the site.)
+
+| Code | Meaning | Esri check |
+| --- | --- | --- |
+| ESC001 | HTTPS only; old TLS versions; HSTS | SS01 |
+| ESC002 | Standardized queries; the legacy URL parser | SS02 |
+| ESC003 | Token requests with GET or with credentials in the query string | SS03, SS04 |
+| ESC004 | Services directory browsable; cross-domain from any origin | SS07, SS08 |
+| ESC005 | Web Adaptors over HTTPS; direct admin access; unsecured output directories | SS10 |
+| ESC006 | Primary site administrator enabled | SS11 |
+| ESC007 | Server certificate expiry and trust | SS14 |
+| ESC011 to ESC016 | Portal: HTTPS only, services directory, anonymous access, cross-domain, automatic accounts, certificate | PS04, PS03, PS06, PS09, PS08 |
+| ESC099 | With `--verbose`: scanner checks this tool does not read | |
+
+`security/tokens` holds the token shared key, and `security/config` can hold the portal
+secret and trust keys. Only named fields are read, so they never reach the output or
+`--json` ([ADR 0008](docs/adr/0008-security-reads-settings-not-secrets.md)).
+
+## incident
+
+Contingency playbooks for a security incident on the site: `admin-account`, `token`,
+`exposed-service`, `content` and `host`. Same phases as `rdsops incident` (NIST SP 800-61
+Rev. 3), the CISA one-hour notification right after triage with `--federal`, and logs
+saved before anything rotates, resets, rebuilds or restores. It prints and runs nothing.
+
+```bash
+egisops incident --kind admin-account --server https://gis.nwsa.example/server \
+    --portal-url https://gis.nwsa.example/portal --account gisadmin2 --psa-enabled \
+    --federal --backup-age-hours 18
+```
+
+```
+incident  admin-account: An administrator account on the server or portal is in the wrong hands
+  server https://gis.nwsa.example/server  portal https://gis.nwsa.example/portal  federal
+
+  [ok  ] INC101  Newest webgisdr backup is 18 hours old
+  [WARN] INC102  The primary site administrator is enabled
+               If its password is known to the attacker, they keep admin access through any identity store change. It is disabled in the playbook.
+  [WARN] INC105  Federal system: CISA notification due within one hour of identification
+               The clock starts when the agency's CSIRT, SOC or IT department identifies the incident, not when the investigation ends.
+
+  Playbook (nothing here has been run)
+
+  Triage
+   1. Open an incident record and name one incident lead
+      Start a timeline now (UTC). Every action from here on goes in it with who and when.
+   2. Scope: which site, which machines, which data
+      > Site https://gis.nwsa.example/portal. List the federated servers, the registered data stores and the enterprise geodatabases behind them.
+      A compromise of the site reaches every database registered with it.
+
+  Notify
+   3. Report to CISA within one hour of identification
+      > https://www.cisa.gov/report
+      CISA's Federal Incident Notification Guidelines: federal Executive Branch civilian agencies notify CISA within one hour of the incident being identified by the agency's top-level CSIRT, SOC or IT department. Report what is known; update later. Contractors report through the agency and their contract terms.
+   4. Tell the agency SOC and the system owner
+      Follow the agency incident response plan, including privacy officials if personal data may be involved.
+
+  Contain
+   5. Disable the portal account gisadmin2
+      $ POST https://gis.nwsa.example/portal/sharing/rest/community/users/gisadmin2/disable f=json
+      Disabling blocks new sign-ins and keeps the account and its content for the investigation. Do not delete it. Access is cut before the logs are saved because an administrator can clear them.
+   6. Invalidate tokens already issued
+      > Update the token shared key (server: security/tokens/update; portal: its token settings). You enter a new random key; it is never written here.
+      A disabled account's tokens stay valid until they expire. Changing the key ends them all, so every user signs in again.
+   7. Limit admin access while you work
+      $ POST https://gis.nwsa.example/server/admin/security/config/update allowedAdminAccessIPs=<incident team addresses> f=json
+      Keeps the admin API to the people responding. Undo at the end.
+
+  Preserve
+   8. Save the server logs before anything changes
+      $ POST https://gis.nwsa.example/server/admin/logs/query level=FINE startTime=<now ms> endTime=<epoch ms of the last known good time> pageSize=10000 f=json
+      Server logs roll over and the log level may be low; save them now, page by page, into the incident record. Raise the level to FINE for the duration.
+   9. Save the portal logs
+      $ POST https://gis.nwsa.example/portal/portaladmin/logs/query level=FINE startTime=<now ms> endTime=<epoch ms of the last known good time> f=json
+      Portal logs show sign-ins, sharing changes and administrative actions.
+  10. Save the web server and load balancer access logs
+      They hold source addresses that ArcGIS logs do not. Copy them off the machines.
+  ...
+```
+
+(The first part of a real run; the rest lists what the account did, removes what was
+added, resets the credentials it could read, disables the primary site administrator,
+recovers the account with MFA, and ends with `egisops security` and a review.)
+
 ## Credentials and TLS
 
 - A token from `EGISOPS_TOKEN`, or a user (`--user` or `EGISOPS_USER`) with
@@ -325,5 +446,7 @@ They never appear in output ([ADR 0006](docs/adr/0006-backup-check-works-on-file
 | `tests/test_datastore.py` | Esri's validate examples, including "Healthy" with an unavailable machine; primary vs standby; backup age in ms or s; missing machine names ask for `--machine` |
 | `tests/test_backup.py` | Esri's three example properties files; escaping; secrets absent from all output; RPO bands; newest by modified time, not name; incremental and full; Esri's output file, success and failure |
 | `tests/test_stack.py` | One release across components; mixed Data Stores; the geodatabase through the real rdsops; direct and interim upgrade paths; a database minor that is too old for the target; the tile cache store at 12.0; running without rdsops |
+| `tests/test_security.py` | Documented example responses; every scanner mapping; marked placeholder secrets absent from the snapshot and from `--json`; unreadable parts reported, not assumed |
+| `tests/test_incident.py` | Every playbook's shape; federal notification right after triage; logs saved before anything destroys evidence; export before import; disk capture before a machine leaves the site; no secrets in any step |
 | `tests/test_cli.py` | JSON output, token from the environment, and no password or no-verify options |
 | `tests/test_portable.py` | Evaluators import with `socket`, `ssl` and `urllib` blocked |

@@ -1,0 +1,8 @@
+{
+  "type": "BUILTIN",
+  "properties": {
+    "sharedKey": "JQDMe5Idm+8opD68HKGM8hvBngmOuceNVE9a2y/KLR=",
+    "longTimeout": "2880",
+    "shortTimeout": "120"
+  }
+}

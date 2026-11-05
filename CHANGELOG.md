@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.0 (2026-11-05)
+
+- `egisops security`: server and portal settings against Esri's serverScan and portalScan
+  checks (SS01 to SS04, SS07, SS08, SS10, SS11, SS14; PS03, PS04, PS06, PS08, PS09), plus
+  old TLS versions, HSTS, the legacy URL parser, direct admin access, unsecured output
+  directories and automatic account creation. Secrets in the same resources are never
+  read. `--verbose` lists the scanner checks not read.
+- `egisops incident`: playbooks for a compromised admin account, leaked tokens, an exposed
+  service, deleted or changed content, and a compromised machine. Prints only.
+- ADR 0008.
+
 ## 0.5.0 (2026-11-04)
 
 - `egisops stack-compat`: Portal, the hosting server and every ArcGIS Data Store on one

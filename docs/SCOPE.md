@@ -11,6 +11,7 @@ Agreed 2026-11-04. Targets ArcGIS Enterprise 11.5 and 12.x.
 | v0.3 (released) | `portal-health`, `datastore` | Portal health, machines, license and member capacity, TLS certificate, federated server validation, search index; Data Store validation, machines, standby, server connection, backup age |
 | v0.4 (released) | `backup-check` | `webgisdr` properties lint (provider keys, escaping, plain-text secrets, mode, portal URL), newest `.webgissite` against an RPO target, last run's output file |
 | v0.5 (released) | `stack-compat` | Portal, hosting server and Data Store on one release; the RDS geodatabase through rdsops `compat`; ArcGIS Pro companion; upgrade plan to `--target` |
+| v0.6 | `security`, `incident` | Settings against Esri's serverScan and portalScan checks, secrets never read; incident playbooks that print (ADR 0008) |
 
 ## Facts the design rests on (checked 2026-11-04)
 
@@ -37,7 +38,11 @@ Agreed 2026-11-04. Targets ArcGIS Enterprise 11.5 and 12.x.
 | All base ArcGIS Enterprise components must use the same software version; all data stores registered to one ArcGIS Server site must run the same ArcGIS Data Store release | [Upgrade ArcGIS Data Store](https://doc.esri.com/en/arcgis-enterprise/latest/deploy/upgrade-data-store.html) |
 | Direct upgrades: 11.0 to 12.0 go to 12.1; 10.8 to 10.9.1 to 11.5; 10.7 to 10.7.1 to 11.3; 10.5 to 10.6.1 to 10.9.1. Order: Portal, its Web Adaptor, hosting server, its Web Adaptor, Data Store, other federated servers. Back up first. Web AppBuilder, Configurable Apps, Map Viewer Classic, the tile cache data store and others retired at 12.0 | [Upgrade ArcGIS Enterprise](https://doc.esri.com/en/arcgis-enterprise/latest/deploy/upgrade-arcgis-enterprise.html) |
 | `webgisdr` backs up Portal items, hosted layers, federated server settings and Data Store data, not map or tile caches | [Create an ArcGIS Enterprise backup](https://doc.esri.com/en/arcgis-enterprise/latest/administer/create-web-gis-backup.html) |
+| serverScan.py checks SS01 to SS15 and portalScan.py checks PS01 to PS18, with severities | [Scan ArcGIS Server](https://doc.esri.com/en/arcgis-enterprise/latest/plan/scan-arcgis-server-for-security-best-practices.html), [Scan your portal](https://doc.esri.com/en/arcgis-enterprise/latest/administer/scan-your-portal-for-security-best-practices.html) |
+| `security/config`: `Protocol` (HTTP, HTTP_AND_HTTPS, HTTPS), `httpsProtocols` (TLS 1.2 and 1.3 by default), `HSTSEnabled`, `virtualDirsSecurityEnabled` (default false), `allowDirectAccess` (default true), `allowedAdminAccessIPs`; the response can include `portalSecretKey` and `webgisServerTrustKey` | [Security Configuration](https://developers.arcgis.com/rest/enterprise-administration/server/securityconfig/), [Update Security Configuration](https://developers.arcgis.com/rest/enterprise-administration/server/updatesecurityconfig/) |
+| `security/tokens` returns the token configuration including `sharedKey` | [Tokens](https://developers.arcgis.com/rest/enterprise-administration/server/tokens/) |
+| Federal Executive Branch civilian agencies notify CISA within one hour of identification; NIST SP 800-61 Rev. 3 (April 2025) | [CISA](https://www.cisa.gov/incident-notification-guidelines), [NIST](https://csrc.nist.gov/pubs/sp/800/61/r3/final) |
 
 ## Out of scope
 
-Changing anything on the site. Every command reads; the fix is printed for a person to run.
+Changing anything on the site. Every command reads; the fix, and every incident step, is printed for a person to run.
