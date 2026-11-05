@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "egisops"
-version = "0.4.0"
+version = "0.5.0"
 description = "Operations checks for ArcGIS Enterprise on the ArcGIS REST Administrator API"
 readme = "README.md"
 license = { text = "MIT" }
@@ -14,6 +14,8 @@ dependencies = []  # standard library only, on purpose (ADR 0002)
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6"]
+# stack-compat's database side uses rdsops and its Esri support matrix (ADR 0007).
+stack = ["rdsops @ git+https://github.com/iDan-Armstrong/rds-geodatabase-ops@v0.4.0"]
 
 [project.scripts]
 egisops = "egisops.cli:main"

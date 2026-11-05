@@ -12,7 +12,7 @@ It is the ArcGIS Enterprise counterpart to
 covers the PostgreSQL database underneath, and it feeds the same
 [SIMServo](https://idan-armstrong.github.io/simservo/) training game.
 
-**Status:** v0.4: `egisops server-health`, `services`, `logs`, `portal-health`, `datastore` and `backup-check`. [docs/SCOPE.md](docs/SCOPE.md) has the plan.
+**Status:** v0.5: `egisops server-health`, `services`, `logs`, `portal-health`, `datastore`, `backup-check` and `stack-compat`. [docs/SCOPE.md](docs/SCOPE.md) has the plan.
 
 ## How this was built, and what that means
 
@@ -202,6 +202,47 @@ The validate call needs one data store machine name per store. It comes from `--
 or from the data item; [ADR 0005](docs/adr/0005-portal-tokens-and-data-store-machines.md)
 explains why both.
 
+## stack-compat
+
+Do the pieces belong together? Portal, the hosting server and every ArcGIS Data Store must
+be on one release; the RDS for PostgreSQL geodatabase must be supported by that release;
+ArcGIS Pro should be the companion version. With `--target`, it lays out the upgrade.
+
+The database part is [rdsops](https://github.com/iDan-Armstrong/rds-geodatabase-ops)
+`compat` and its dated Esri support matrix, so its findings keep their CMP codes
+([ADR 0007](docs/adr/0007-stack-compat-uses-rdsops.md)). Install it with
+`pip install -e '.[stack]'`.
+
+```bash
+egisops stack-compat --url https://gis.example.com/server --user siteadmin \
+    --portal-version 11.5 --engine-version 16.8 --postgis 3.5.2 --pro-version 3.5 --target 12.1
+```
+
+```
+stack-compat  Portal for ArcGIS 11.5.0, ArcGIS Server (hosting) 11.5.0  RDS for PostgreSQL 16.8
+
+  [ok  ] STK001  2 component(s) on ArcGIS Enterprise 11.5
+  [ok  ] CMP001  PostgreSQL 16 is supported by ArcGIS Enterprise 11.5 / Pro 3.5
+  [ok  ] CMP002  RDS 16.8 is the certified minor
+  [ok  ] CMP003  PostGIS 3.5.2 is not on the blocked list
+  [ok  ] CMP004  Support data for 11.5 checked 2026-11-04 (0 days ago)
+  [ok  ] STK004  ArcGIS Pro 3.5 is the companion
+  [WARN] STK005  Upgrade plan: 11.5 to 12.1
+               11.5 upgrades directly to 12.1. Take a WebGISDR backup before upgrading any component. Order: Portal for ArcGIS, Web Adaptor for Portal, the hosting server, Web Adaptor for ArcGIS Server, ArcGIS Data Store, other federated servers. ArcGIS Web AppBuilder, ArcGIS Configurable Apps, Map Viewer Classic, the tile cache data store, ArcGIS Insights and other features were retired at 12.0: migrate away on 11.5 first. At 12.1 the geodatabase needs attention: CMP002 RDS 16.8 is below the certified minimum 16.11. Companion ArcGIS Pro for 12.1: 3.7.
+```
+
+(Run offline with `--server-version 11.5.0` on 2026-11-04.)
+
+| Code | Meaning |
+| --- | --- |
+| STK001 | Base deployment components on one release (FAIL when mixed, with the upgrade order) |
+| STK002 | Every data store on the server at the same Data Store release |
+| CMP001-CMP004 | The geodatabase against the Esri matrix, from rdsops `compat` |
+| STK003 | No database versions given (info) |
+| STK004 | ArcGIS Pro against the companion version for the release |
+| STK005 | Upgrade plan to `--target`: direct or interim, backup, order, retired features, the geodatabase at the target |
+| STK009 | rdsops not installed, or a part of the check that could not run |
+
 ## backup-check
 
 Checks an ArcGIS Enterprise backup setup from its files, with no network calls: the
@@ -283,5 +324,6 @@ They never appear in output ([ADR 0006](docs/adr/0006-backup-check-works-on-file
 | `tests/test_portal.py` | Every PTL finding and band; token in the header, never the URL; HTML health check; uninitialized site; federation failures named by server and role; public-only run without a token |
 | `tests/test_datastore.py` | Esri's validate examples, including "Healthy" with an unavailable machine; primary vs standby; backup age in ms or s; missing machine names ask for `--machine` |
 | `tests/test_backup.py` | Esri's three example properties files; escaping; secrets absent from all output; RPO bands; newest by modified time, not name; incremental and full; Esri's output file, success and failure |
+| `tests/test_stack.py` | One release across components; mixed Data Stores; the geodatabase through the real rdsops; direct and interim upgrade paths; a database minor that is too old for the target; the tile cache store at 12.0; running without rdsops |
 | `tests/test_cli.py` | JSON output, token from the environment, and no password or no-verify options |
 | `tests/test_portable.py` | Evaluators import with `socket`, `ssl` and `urllib` blocked |

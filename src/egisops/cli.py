@@ -5,6 +5,8 @@
     egisops logs          --url https://gis.example.com/arcgis --hours 24
     egisops portal-health --url https://gis.example.com/portal --user portaladmin
     egisops datastore     --url https://gis.example.com/server --user siteadmin
+    egisops stack-compat  --url https://gis.example.com/server --portal-version 11.5 \
+                          --engine-version 16.8 --postgis 3.5.2 --target 12.1
     egisops backup-check  --properties webgisdr.properties --backups D:\\backups --rpo-hours 24
     EGISOPS_TOKEN=... egisops server-health --url ... --json
 
@@ -135,6 +137,31 @@ def cmd_datastore(args) -> int:
     )
 
 
+def cmd_stack_compat(args) -> int:
+    from . import stack
+
+    admin = None if args.server_version else connect(args)
+    snap = stack.gather(
+        admin,
+        portal_version=args.portal_version,
+        server_version=args.server_version,
+        engine_version=args.engine_version,
+        postgis_version=args.postgis,
+        pro_version=args.pro_version,
+        target=args.target,
+        machine=args.machine,
+    )
+    db, pro = stack.rdsops_hooks()
+    findings = stack.evaluate(snap, db, pro)
+    header = [
+        "stack-compat  "
+        + ", ".join(f"{c.name} {c.version}" for c in snap.components)
+        + (f"  RDS for PostgreSQL {snap.engine_version}" if snap.engine_version else "")
+    ]
+    extra = {"components": {c.name: c.version for c in snap.components}}
+    return emit(args, header, findings, extra)
+
+
 def cmd_backup_check(args) -> int:
     from . import backup
 
@@ -215,6 +242,25 @@ def build_parser() -> argparse.ArgumentParser:
         "--backup-days", type=float, default=7, help="Warn when the newest backup is older"
     )
     ds.set_defaults(func=cmd_datastore)
+
+    sc = sub.add_parser(
+        "stack-compat",
+        help="Portal, Server, Data Store, RDS geodatabase and Pro versions together; upgrade plan",
+    )
+    sc.add_argument("--url", help="Hosting server root (omit with --server-version)")
+    sc.add_argument("--user", help="Admin user (or EGISOPS_USER)")
+    sc.add_argument("--ca-file")
+    sc.set_defaults(no_login=False)
+    sc.add_argument("--server-version", help="Use this instead of reading the server")
+    sc.add_argument("--portal-version", help="Portal for ArcGIS version, e.g. 11.5")
+    sc.add_argument("--machine", help="A data store machine name, as for datastore")
+    sc.add_argument("--engine-version", help="RDS for PostgreSQL version, e.g. 16.8")
+    sc.add_argument("--postgis", help="PostGIS version, e.g. 3.5.2")
+    sc.add_argument("--pro-version", help="ArcGIS Pro version in use")
+    sc.add_argument("--target", help="Plan an upgrade to this ArcGIS Enterprise release")
+    sc.add_argument("--json", action="store_true")
+    sc.add_argument("--quiet", action="store_true", help="Hide passing checks")
+    sc.set_defaults(func=cmd_stack_compat)
 
     bk = sub.add_parser(
         "backup-check", help="WebGISDR properties lint and newest backup against an RPO (offline)"

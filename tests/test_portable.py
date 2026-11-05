@@ -10,7 +10,7 @@ def test_evaluators_import_without_network_stack():
         "for m in ['urllib.request', 'socket', 'ssl', 'http.client']:\n"
         "    sys.modules[m] = None\n"
         "import egisops.findings, egisops.server, egisops.services, egisops.logs\n"
-        "import egisops.portal, egisops.datastore, egisops.backup\n"
+        "import egisops.portal, egisops.datastore, egisops.backup, egisops.stack\n"
         "from datetime import datetime, UTC\n"
         "s = egisops.server.ServerSnapshot('x', 200, True, '11.5.0', True)\n"
         "assert egisops.server.evaluate(s, datetime.now(UTC))\n"

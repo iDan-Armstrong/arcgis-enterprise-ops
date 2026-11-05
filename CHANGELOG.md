@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.0 (2026-11-04)
+
+- `egisops stack-compat`: Portal, the hosting server and every ArcGIS Data Store on one
+  release (FAIL when mixed, with Esri's upgrade order); the RDS for PostgreSQL geodatabase
+  through rdsops `compat`; ArcGIS Pro against the companion version; and with `--target`,
+  an upgrade plan: direct or interim path, backup first, order, features retired at 12.0
+  (including the tile cache data store), and whether the geodatabase is supported at the
+  target. Live from the server, or offline with `--server-version`.
+- Optional extra `egisops[stack]` installs rdsops. Without it, the database side reports
+  STK009 and the rest runs.
+- ADR 0007: stack-compat uses rdsops for the database, and does not copy its matrix.
+
 ## 0.4.0 (2026-11-04)
 
 - `egisops backup-check`: offline check of a WebGISDR setup. Lints `webgisdr.properties`
